@@ -4,5 +4,9 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="dialogtitle">Info</string>
+    <string name="dialogmessage">No internet connection. Limited tracking capabilities</string>
+    <string name="dialogbutton">Enable network connection</string>
+
     <string name="action_settings">Settings</string>
 </resources>
