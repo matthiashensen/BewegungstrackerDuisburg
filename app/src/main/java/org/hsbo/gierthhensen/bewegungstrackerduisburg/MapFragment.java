@@ -9,6 +9,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+//TODO: Implement Instance Managing
+
 public class MapFragment extends Fragment {
 
     WebView webView;
