@@ -15,9 +15,17 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+//TODO: Android 6.0 Compability
+
+/**
+ * LocationService / registered in Manifest
+ */
+
 public class LocationService extends IntentService {
 
     private static MyLocationListener myLocationListener;
+
+    // same as in StartActivity
     private static final String BROADCAST = "gierthhensen.hsbo.org.bewegungstrackerduisburg.BROADCAST";
     private static final String DATA = "gierthhensen.hsbo.org.bewegungstrackerduisburg.DATA";
 
@@ -33,16 +41,17 @@ public class LocationService extends IntentService {
         }
 
         switch (type) {
-            case "start":
+            case "startTracking":
                 myLocationListener.startLocationUpdates();
                 break;
-            case "end":
+            case "endTracking":
                 myLocationListener.stopLocationUpdates();
             default:
         }
     }
 
     public void sendLocation(Location location) {
+        // send intent with data
         Intent lIntent =
                 new Intent(BROADCAST)
                         .putExtra(DATA, location);
@@ -56,8 +65,8 @@ public class LocationService extends IntentService {
         private LocationRequest myLocationRequest;
         private LocationService myLocationService;
 
-        private static final long UPDATE_MS = 5 * 1000;
-        private static final long FASTEST_MS = 5 * 1000;
+        private static final long UPDATE_in_MS = 5 * 1000;
+        private static final long FASTEST_in_MS = 5 * 1000;
 
         public MyLocationListener(LocationService locationService) {
 
@@ -76,7 +85,7 @@ public class LocationService extends IntentService {
         @Override
         public void onConnected(@Nullable Bundle bundle) {
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
+                // TODO: CHECK PERMISSION
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
                 //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
@@ -90,21 +99,21 @@ public class LocationService extends IntentService {
 
             myLocationRequest = LocationRequest.create()
                     .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                    .setInterval(UPDATE_MS)
-                    .setFastestInterval(FASTEST_MS);
+                    .setInterval(UPDATE_in_MS)
+                    .setFastestInterval(FASTEST_in_MS);
 
             LocationServices.FusedLocationApi
                     .requestLocationUpdates(myGoogleApiClient, myLocationRequest, this);
         }
 
         @Override
-        public void onConnectionSuspended(int i) {
-            //TODO
+        public void onConnectionSuspended(int intent) {
+            //TODO: On Suspend
         }
 
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+            //TODO: When connection failed
         }
 
         @Override
@@ -113,10 +122,16 @@ public class LocationService extends IntentService {
             myLocationService.sendLocation(location);
         }
 
+        /**
+         * Start getting location updates
+         */
         public void startLocationUpdates() {
             myGoogleApiClient.connect();
         }
 
+        /**
+         * Stop getting location updates
+         */
         public void stopLocationUpdates() {
             if (myGoogleApiClient.isConnected()) {
                 LocationServices.FusedLocationApi.removeLocationUpdates(myGoogleApiClient, this);

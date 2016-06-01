@@ -3,9 +3,9 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/gps"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="GPS" />
     </group>
 
     <item android:title="Communicate">

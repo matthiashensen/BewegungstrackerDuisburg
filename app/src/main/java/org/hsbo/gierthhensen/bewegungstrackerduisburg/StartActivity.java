@@ -22,10 +22,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+/**
+ * Created by Lukas Gierth on 26.05.16.
+ */
+
 @SuppressLint({"ShowToast"})
 public class StartActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    // objects for location
     private Intent myLocationServiceIntent;
     private Location myLastLocation;
     private static boolean gpsStat = false;
@@ -34,7 +39,6 @@ public class StartActivity extends AppCompatActivity
     private static final String BROADCAST = "gierthhensen.hsbo.org.bewegungstrackerduisburg.BROADCAST";
     private static final String DATA = "gierthhensen.hsbo.org.bewegungstrackerduisburg.DATA";
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +46,7 @@ public class StartActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // location
         myLocationServiceIntent = new Intent(Intent.ACTION_SYNC, null, this, LocationService.class);
         ResponseReceiver responseReceiver = new ResponseReceiver();
         IntentFilter intentFilter = new IntentFilter(BROADCAST);
@@ -53,7 +58,7 @@ public class StartActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Show Own Tracking Route", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -122,14 +127,13 @@ public class StartActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        if (id == R.id.gps) {
             startGPS();
 
         }
+
+        else if (id == R.id.nav_share) {}
+        else if (id == R.id.nav_send) {}
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -148,18 +152,21 @@ public class StartActivity extends AppCompatActivity
         }
     }
 
+    // test method
     public void updatePoint (Location location) {
-        Toast.makeText(this, location.toString(), Toast.LENGTH_SHORT).show();
+        String lat = Double.toString(location.getLatitude());
+        String lon = Double.toString(location.getLongitude());
+        Toast.makeText(this, lon+" , "+lat , Toast.LENGTH_SHORT).show();
     }
 
     public void startGPS() {
         if (gpsStat == false) {
             gpsStat = true;
-            myLocationServiceIntent.putExtra("type", "start");
+            myLocationServiceIntent.putExtra("type", "startTracking");
             startService(myLocationServiceIntent);
         } else if (gpsStat == true) {
             gpsStat = false;
-            myLocationServiceIntent.putExtra("type", "end");
+            myLocationServiceIntent.putExtra("type", "endTracking");
             startService(myLocationServiceIntent);
         }
     }
