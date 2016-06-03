@@ -9,7 +9,7 @@
     tools:showIn="@layout/app_bar_start">
 
 
-    <fragment android:name="org.hsbo.gierthhensen.bewegungstrackerduisburg.MapFragment"
+    <fragment android:name="org.hsbo.gierthhensen.bewegungstrackerduisburg.StatusFragment"
         android:id="@+id/headlines_fragment"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
