@@ -132,7 +132,6 @@ public class StartActivity extends AppCompatActivity
 
         if (id == R.id.gps) {
             startGPS();
-
         }
 
         else if (id == R.id.nav_share) {}
@@ -159,7 +158,8 @@ public class StartActivity extends AppCompatActivity
     public void updatePoint (Location location) {
         String lat = Double.toString(location.getLatitude());
         String lon = Double.toString(location.getLongitude());
-        Toast.makeText(this, lon+" , "+lat , Toast.LENGTH_SHORT).show();
+        TextView coordinates = (TextView) findViewById(R.id.coordinates);
+        coordinates.setText(lon + " , " + lat);
     }
 
     public void startGPS() {
@@ -168,18 +168,24 @@ public class StartActivity extends AppCompatActivity
             myLocationServiceIntent.putExtra("type", "startTracking");
             startService(myLocationServiceIntent);
 
-            TextView myText = (TextView) findViewById(R.id.statusText);
-            myText.setText("GPS Tracking running");
-            myText.setTextColor(Color.GREEN);
+            TextView statusText = (TextView) findViewById(R.id.statusText);
+            statusText.setText("GPS Tracking running");
+            statusText.setTextColor(Color.GREEN);
+
+            TextView cText = (TextView) findViewById(R.id.coordinates);
+            cText.setTextColor(Color.YELLOW);
 
         } else if (gpsStat == true) {
             gpsStat = false;
             myLocationServiceIntent.putExtra("type", "endTracking");
             startService(myLocationServiceIntent);
 
-            TextView myText = (TextView) findViewById(R.id.statusText);
-            myText.setText("Service Not Running");
-            myText.setTextColor(Color.RED);
+            TextView statusText = (TextView) findViewById(R.id.statusText);
+            statusText.setText("Service Not Running");
+            statusText.setTextColor(Color.RED);
+
+            TextView cText = (TextView) findViewById(R.id.coordinates);
+            cText.setTextColor(Color.RED);
         }
     }
 }
