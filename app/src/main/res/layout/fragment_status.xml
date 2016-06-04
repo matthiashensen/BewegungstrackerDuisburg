@@ -5,8 +5,9 @@
     tools:context="org.hsbo.gierthhensen.bewegungstrackerduisburg.StatusFragment">
 
     <TextView
+        android:id="@+id/statusText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="SEHENNNN" />
+        android:text="Service Not Running" />
 
 </FrameLayout>

@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -165,10 +167,19 @@ public class StartActivity extends AppCompatActivity
             gpsStat = true;
             myLocationServiceIntent.putExtra("type", "startTracking");
             startService(myLocationServiceIntent);
+
+            TextView myText = (TextView) findViewById(R.id.statusText);
+            myText.setText("GPS Tracking running");
+            myText.setTextColor(Color.GREEN);
+
         } else if (gpsStat == true) {
             gpsStat = false;
             myLocationServiceIntent.putExtra("type", "endTracking");
             startService(myLocationServiceIntent);
+
+            TextView myText = (TextView) findViewById(R.id.statusText);
+            myText.setText("Service Not Running");
+            myText.setTextColor(Color.RED);
         }
     }
 }
