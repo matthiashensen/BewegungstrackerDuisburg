@@ -33,6 +33,10 @@ public class LocationService extends IntentService {
         super("Location Service");
     }
 
+    /**
+     * Handles incoming intents
+     * @param intent
+     */
     @Override
     protected void onHandleIntent(Intent intent) {
         String type = intent.getStringExtra("type");
@@ -50,6 +54,10 @@ public class LocationService extends IntentService {
         }
     }
 
+    /**
+     * Sends location as intent
+     * @param location
+     */
     public void sendLocation(Location location) {
         // send intent with data
         Intent lIntent =
@@ -58,6 +66,9 @@ public class LocationService extends IntentService {
         LocalBroadcastManager.getInstance(this).sendBroadcast(lIntent);
     }
 
+    /**
+     * LocationListener which calls GoogleAPIs for location via GPS
+     */
     private class MyLocationListener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
         private GoogleApiClient myGoogleApiClient;
@@ -82,6 +93,10 @@ public class LocationService extends IntentService {
             }
         }
 
+        /**
+         * send request when connected to GoogleAPI
+         * @param bundle
+         */
         @Override
         public void onConnected(@Nullable Bundle bundle) {
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -116,6 +131,10 @@ public class LocationService extends IntentService {
             //TODO: When connection failed
         }
 
+        /**
+         * called when location has changed
+         * @param location
+         */
         @Override
         public void onLocationChanged(Location location) {
             myLastLocation = location;

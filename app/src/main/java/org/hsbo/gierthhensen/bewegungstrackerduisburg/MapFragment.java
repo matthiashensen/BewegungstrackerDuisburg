@@ -11,13 +11,19 @@ import android.webkit.WebViewClient;
 
 //TODO: Implement Instance Managing
 
+/**
+ * FragmentClass for map fragment
+ * Shows a webview with Leaflet
+ */
 public class MapFragment extends Fragment {
 
     WebView webView;
     View view;
 
+    /**
+     * Required empty constructor
+     */
     public MapFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -25,6 +31,14 @@ public class MapFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * Called on first creation of the fragment
+     * Connects WebView and WebView settings
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return view
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

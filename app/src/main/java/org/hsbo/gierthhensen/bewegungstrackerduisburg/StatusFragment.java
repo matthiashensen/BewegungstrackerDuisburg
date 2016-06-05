@@ -10,14 +10,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-
+/**
+ * FragmentClass for the status fragment.
+ * Show the state of the GPS tracking service
+ */
 public class StatusFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
 
     View view;
 
+    /**
+     * Required empty public constructor
+     */
     public StatusFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -25,6 +30,13 @@ public class StatusFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    /**
+     * On first creation of the fragment
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

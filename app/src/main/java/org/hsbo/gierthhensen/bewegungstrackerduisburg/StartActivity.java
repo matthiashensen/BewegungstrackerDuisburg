@@ -43,6 +43,10 @@ public class StartActivity extends AppCompatActivity
     private static final String BROADCAST = "gierthhensen.hsbo.org.bewegungstrackerduisburg.BROADCAST";
     private static final String DATA = "gierthhensen.hsbo.org.bewegungstrackerduisburg.DATA";
 
+    /**
+     * Is called on first creation of activity
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +96,11 @@ public class StartActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Called when OptionsMenu is created
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -154,7 +163,10 @@ public class StartActivity extends AppCompatActivity
         }
     }
 
-    // test method
+    /**
+     * Sets TextView to new coordinates
+     * @param location
+     */
     public void updatePoint (Location location) {
         String lat = Double.toString(location.getLatitude());
         String lon = Double.toString(location.getLongitude());
@@ -162,6 +174,9 @@ public class StartActivity extends AppCompatActivity
         coordinates.setText(lon + " , " + lat);
     }
 
+    /**
+     * Called when GPS button is pressed
+     */
     public void startGPS() {
         if (gpsStat == false) {
             gpsStat = true;
