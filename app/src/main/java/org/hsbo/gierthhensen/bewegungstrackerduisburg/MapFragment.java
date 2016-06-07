@@ -26,6 +26,11 @@ public class MapFragment extends Fragment {
     public MapFragment() {
     }
 
+    public static Fragment newInstance() {
+        MapFragment frg = new MapFragment();
+        return frg;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +44,7 @@ public class MapFragment extends Fragment {
      * @param savedInstanceState
      * @return view
      */
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

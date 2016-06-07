@@ -15,19 +15,31 @@ import android.widget.TextView;
  * Show the state of the GPS tracking service
  */
 public class StatusFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
 
     View view;
-
     /**
      * Required empty public constructor
      */
     public StatusFragment() {
     }
 
+
+    public static Fragment newInstance() {
+        StatusFragment frg = new StatusFragment();
+        return frg;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState==null){
+
+        }
+        else {
+
+        }
     }
 
     /**
@@ -40,14 +52,24 @@ public class StatusFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         view = inflater.inflate(R.layout.fragment_status, container, false);
-
-        TextView statusText = (TextView) view.findViewById(R.id.statusText);
-        TextView coordinateText = (TextView) view.findViewById(R.id.coordinates);
-
         view.setBackgroundColor(Color.GRAY);
 
         return view;
     }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
 }

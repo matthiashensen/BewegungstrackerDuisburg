@@ -11,7 +11,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
@@ -24,7 +24,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * Created by Lukas Gierth on 26.05.16.
@@ -38,6 +37,7 @@ public class StartActivity extends AppCompatActivity
     private Intent myLocationServiceIntent;
     private Location myLastLocation;
     private static boolean gpsStat = false;
+    private static boolean map_active = false;
 
     // same as in LocationService - unique name
     private static final String BROADCAST = "gierthhensen.hsbo.org.bewegungstrackerduisburg.BROADCAST";
@@ -51,6 +51,7 @@ public class StartActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+        addDynamicFragment();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -68,6 +69,8 @@ public class StartActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Show Own Tracking Route", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                switchFragment();
+
             }
         });
 
@@ -81,6 +84,11 @@ public class StartActivity extends AppCompatActivity
         // Nav Drawer
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void addDynamicFragment() {
+        Fragment frg = StatusFragment.newInstance();
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, frg).commit();
     }
 
     /**
@@ -180,27 +188,54 @@ public class StartActivity extends AppCompatActivity
     public void startGPS() {
         if (gpsStat == false) {
             gpsStat = true;
+
             myLocationServiceIntent.putExtra("type", "startTracking");
             startService(myLocationServiceIntent);
 
             TextView statusText = (TextView) findViewById(R.id.statusText);
             statusText.setText("GPS Tracking running");
             statusText.setTextColor(Color.GREEN);
-
             TextView cText = (TextView) findViewById(R.id.coordinates);
             cText.setTextColor(Color.YELLOW);
 
         } else if (gpsStat == true) {
             gpsStat = false;
+
             myLocationServiceIntent.putExtra("type", "endTracking");
             startService(myLocationServiceIntent);
 
             TextView statusText = (TextView) findViewById(R.id.statusText);
             statusText.setText("Service Not Running");
             statusText.setTextColor(Color.RED);
-
             TextView cText = (TextView) findViewById(R.id.coordinates);
             cText.setTextColor(Color.RED);
+        }
+    }
+
+
+    /**
+     * Switches between status and map
+     */
+    public void switchFragment(){
+
+        if (map_active == false){
+            MapFragment frgMap = new MapFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, frgMap);
+            transaction.addToBackStack(null);
+            transaction.commit();
+
+            map_active = true;
+        }
+
+        else {
+            StatusFragment frgStatus = new StatusFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, frgStatus);
+            transaction.addToBackStack(null);
+            transaction.commit();
+
+            map_active = false;
         }
     }
 }
