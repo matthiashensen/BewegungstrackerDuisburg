@@ -2,6 +2,7 @@ package org.hsbo.gierthhensen.bewegungstrackerduisburg;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -184,11 +186,10 @@ public class StartActivity extends AppCompatActivity
 
     /**
      * Called when GPS button is pressed
+     * Triggers LocationService
      */
     public void startGPS() {
         if (gpsStat == false) {
-            gpsStat = true;
-
             myLocationServiceIntent.putExtra("type", "startTracking");
             startService(myLocationServiceIntent);
 
@@ -198,9 +199,23 @@ public class StartActivity extends AppCompatActivity
             TextView cText = (TextView) findViewById(R.id.coordinates);
             cText.setTextColor(Color.YELLOW);
 
-        } else if (gpsStat == true) {
-            gpsStat = false;
+            /**
+             *
+             */
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.ic_media_play)
+                            .setOngoing(true)
+                            .setContentTitle("Bewegungstracker Duisburg")
+                            .setContentText("GPS gestartet");
 
+            int mNotificationId = 001;
+            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            mNotifyMgr.notify(mNotificationId, mBuilder.build());
+
+            gpsStat = true;
+
+        } else if (gpsStat == true) {
             myLocationServiceIntent.putExtra("type", "endTracking");
             startService(myLocationServiceIntent);
 
@@ -209,6 +224,9 @@ public class StartActivity extends AppCompatActivity
             statusText.setTextColor(Color.RED);
             TextView cText = (TextView) findViewById(R.id.coordinates);
             cText.setTextColor(Color.RED);
+
+            gpsStat = false;
+            cancelNotification(this, 001);
         }
     }
 
@@ -237,5 +255,16 @@ public class StartActivity extends AppCompatActivity
 
             map_active = false;
         }
+    }
+
+    /**
+     * Cancels Notifications from this app
+     * @param ctx
+     * @param notifyId
+     */
+    public static void cancelNotification(Context ctx, int notifyId) {
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) ctx.getSystemService(ns);
+        nMgr.cancel(notifyId);
     }
 }
