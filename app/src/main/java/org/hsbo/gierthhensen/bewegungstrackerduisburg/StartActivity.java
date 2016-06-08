@@ -10,13 +10,10 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.app.NotificationCompat;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,6 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Created by Lukas Gierth on 26.05.16.
@@ -204,6 +202,7 @@ public class StartActivity extends AppCompatActivity
             mNotifyMgr.notify(mNotificationId, mBuilder.build());
 
             gpsStat = true;
+            Toast.makeText(this, "Started GPS Tracking", Toast.LENGTH_SHORT).show();
 
         } else if (gpsStat == true) {
             myLocationServiceIntent.putExtra("type", "endTracking");
@@ -217,6 +216,8 @@ public class StartActivity extends AppCompatActivity
 
             gpsStat = false;
             cancelNotification(this, 001);
+
+            Toast.makeText(this, "Stopped GPS Tracking", Toast.LENGTH_SHORT).show();
         }
     }
 
