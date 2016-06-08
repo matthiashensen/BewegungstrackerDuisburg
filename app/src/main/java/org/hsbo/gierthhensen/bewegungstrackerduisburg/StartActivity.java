@@ -64,18 +64,6 @@ public class StartActivity extends AppCompatActivity
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 responseReceiver, intentFilter);
 
-        // Floating Button
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Show Own Tracking Route", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                switchFragment();
-
-            }
-        });
-
         // Action Bar
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -153,11 +141,13 @@ public class StartActivity extends AppCompatActivity
             startGPS();
         }
 
-        else if (id == R.id.nav_share) {}
+        else if (id == R.id.nav_share) {
+            switchFragment();
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+        }
         else if (id == R.id.nav_send) {}
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -266,5 +256,16 @@ public class StartActivity extends AppCompatActivity
         String ns = Context.NOTIFICATION_SERVICE;
         NotificationManager nMgr = (NotificationManager) ctx.getSystemService(ns);
         nMgr.cancel(notifyId);
+    }
+
+    /**
+     * called when activity destroyed
+     * Also destroys notification
+     */
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+        cancelNotification(this, 001);
     }
 }

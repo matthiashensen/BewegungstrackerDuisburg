@@ -3,7 +3,8 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/leaflet/1.0.0-rc.1/leaflet-src.js"></script>
+    <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>
     <style>
         body {
         padding: 0;
@@ -20,149 +21,25 @@
 <div id="map"></div>
 
 <script>
-// BASICS
-//
-//
-
 // set osm recognition
 var osmAttr = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
 
 // init map element
-var map = L.map('map').setView([51.505, -0.09], 14);
+var map = L.map('map').setView([45.512, -122.680], 14);
 
 // Add base layer
 var baseLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution: osmAttr
 }).addTo(map);
 
+var trackpoints = L.esri.featureLayer({url: 'https://services.arcgis.com/rOo16HdIMeOBI4Mb/arcgis/rest/services/PDX_Pedestrian_Districts/FeatureServer/0',
+								style: function (){
+									return {color: "#70ca49"}}}).addTo(map);
 
-var marker = L.marker([51.505, -0.09]).addTo(map);
+function addTrackedPoint(lat, lon, uid, date){
 
-marker.on('click', onMarkerClick);
-map.on('click', onMapClick);
-
-toggle1 = false;
-toggle2 = true;
-toggle3 = false;
-
-// methods which get called from the activity
-//
-//
-
-// Change view to coordinates
-function toCity(latIntent, lonIntent, cityName){
-    map.setView([parseFloat(latIntent), parseFloat(lonIntent)], 14);
-    marker.setLatLng([parseFloat(latIntent), parseFloat(lonIntent)]);
-}
-
-// Toggle bplan WMS
-function toggleWMS1() {
-  if(!toggle1) {
-    map.addLayer(bplan);
-  } else {
-    map.removeLayer(bplan);
-  }
-  toggle1 = !toggle1;
-}
-
-// Toggle historic land use WMS
-function toggleWMS2() {
-  if(!toggle3) {
-    map.addLayer(histlanduse);
-  } else {
-    map.removeLayer(histlanduse);
-  }
-  toggle3 = !toggle3;
-}
-
-// Toggle Base OSM Layer
-function toggleBase() {
-  if(!toggle2) {
-
-    map.addLayer(baseLayer);
-
-    if(map.hasLayer(histlanduse) && !map.hasLayer(bplan)){
-        map.removeLayer(histlanduse);
-        map.addLayer(histlanduse);
-    }
-    if(map.hasLayer(bplan) && !map.hasLayer(histlanduse)){
-        map.removeLayer(bplan);
-        map.addLayer(bplan);
-    }
-    else if(map.hasLayer(histlanduse) && map.hasLayer(bplan)){
-        map.removeLayer(histlanduse);
-        map.removeLayer(bplan);
-        map.addLayer(histlanduse);
-        map.addLayer(bplan);
-    }
-  } else {
-    map.removeLayer(baseLayer);
-  }
-  toggle2 = !toggle2;
-}
-
-// onClick methods
-//
-//
-
-// Call Toast in App
-function onMarkerClick() {
-    Android.cityToast();
-}
-
-// Call Toast in App when Map Clicked
-function onMapClick(e) {
-    var toast = "Position: " + e.latlng.toString();
-	Android.positionToast(toast);
-}
-
-// GeoJSON
-//
-//
-
-// line polygon
-var myLines = [{
-    "type": "LineString",
-    "coordinates": [[7.223109, 51.478667], [7.222221, 51.479315], [7.224260, 51.480350],
-    [7.225114, 51.482591], [7.221667, 51.483470], [7.227736, 51.484762], [7.234344, 51.488364],
-    [7.237243, 51.489338], [7.236540, 51.489900]]
-}];
-
-// style for the GeoJSON objects
-var myStyle = {
-    "color": "#ee0000",
-    "weight": 8,
-    "opacity": 0.5,
-    "transparent": true
-};
-
-L.geoJson(myLines, {
-    style: myStyle
-}).addTo(map);
-
-var geojsonFeature = {
-    "type": "Feature",
-    "properties": {
-        "name": "Rewirpowerstadion",
-        "amenity": "Football Stadium",
-        "popupContent": "This is the home ground for the VfL Bochum !"
-    },
-    "geometry": {
-        "type": "Point",
-        "coordinates": [7.236540, 51.489900]
-    }
-};
-
-L.geoJson(geojsonFeature, {
-    onEachFeature: onEachFeature
-}).addTo(map);
-
-
-function onEachFeature(feature, layer) {
-    // does this feature have a property named popupContent?
-    if (feature.properties && feature.properties.popupContent) {
-        layer.bindPopup(feature.properties.popupContent);
-    }
+    var feature = { "type": "Point", "coordinates": [lat, lon] };
+    trackpoints.addFeature(feature);
 }
 </script>
 </body>
