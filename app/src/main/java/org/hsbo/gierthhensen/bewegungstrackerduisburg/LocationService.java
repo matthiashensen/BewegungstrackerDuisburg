@@ -1,6 +1,7 @@
 package org.hsbo.gierthhensen.bewegungstrackerduisburg;
 
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -9,13 +10,18 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-//TODO: Android 6.0 Compability
+import com.google.android.gms.location.ActivityRecognition;
+
+//TODO: Android 6.0 Compatibility
 
 /**
  * LocationService / registered in Manifest
@@ -40,9 +46,13 @@ public class LocationService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String type = intent.getStringExtra("type");
+        int trackingRate = intent.getIntExtra("trackingRate", 10000);
+
         if (myLocationListener == null) {
             myLocationListener = new MyLocationListener(this);
         }
+
+        myLocationListener.setTrackingRate(trackingRate);
 
         switch (type) {
             case "startTracking":
@@ -69,15 +79,15 @@ public class LocationService extends IntentService {
     /**
      * LocationListener which calls GoogleAPIs for location via GPS
      */
-    private class MyLocationListener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+    private class MyLocationListener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status> {
 
         private GoogleApiClient myGoogleApiClient;
         private Location myLastLocation;
         private LocationRequest myLocationRequest;
         private LocationService myLocationService;
 
-        private static final long UPDATE_in_MS = 5 * 1000;
-        private static final long FASTEST_in_MS = 5 * 1000;
+        private long UPDATE_in_MS = 5 * 1000;
+
 
         public MyLocationListener(LocationService locationService) {
 
@@ -89,6 +99,7 @@ public class LocationService extends IntentService {
                         .addConnectionCallbacks(this)
                         .addOnConnectionFailedListener(this)
                         .addApi(LocationServices.API)
+                        .addApi(ActivityRecognition.API)
                         .build();
             }
         }
@@ -115,10 +126,12 @@ public class LocationService extends IntentService {
             myLocationRequest = LocationRequest.create()
                     .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                     .setInterval(UPDATE_in_MS)
-                    .setFastestInterval(FASTEST_in_MS);
+                    .setFastestInterval(UPDATE_in_MS);
 
             LocationServices.FusedLocationApi
                     .requestLocationUpdates(myGoogleApiClient, myLocationRequest, this);
+            ActivityRecognition.ActivityRecognitionApi
+                    .requestActivityUpdates(myGoogleApiClient, UPDATE_in_MS, getActivityDetectionPendingIntent()).setResultCallback(this);
         }
 
         @Override
@@ -129,6 +142,15 @@ public class LocationService extends IntentService {
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
             //TODO: When connection failed
+        }
+
+        public void setTrackingRate(int trackingRate) {
+            UPDATE_in_MS = trackingRate;
+        }
+
+        private PendingIntent getActivityDetectionPendingIntent() {
+            Intent intent = new Intent(getBaseContext(), ActivityIntents.class);
+            return PendingIntent.getService(getBaseContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         /**
@@ -154,8 +176,14 @@ public class LocationService extends IntentService {
         public void stopLocationUpdates() {
             if (myGoogleApiClient.isConnected()) {
                 LocationServices.FusedLocationApi.removeLocationUpdates(myGoogleApiClient, this);
+                ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(myGoogleApiClient, getActivityDetectionPendingIntent());
             }
             myGoogleApiClient.disconnect();
+        }
+
+        @Override
+        public void onResult(@NonNull Status status) {
+
         }
     }
 }

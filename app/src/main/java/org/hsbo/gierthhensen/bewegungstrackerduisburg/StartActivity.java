@@ -7,10 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.app.NotificationCompat;
@@ -22,8 +22,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.location.DetectedActivity;
+
+import java.util.ArrayList;
 
 /**
  * Created by Lukas Gierth on 26.05.16.
@@ -36,12 +39,21 @@ public class StartActivity extends AppCompatActivity
     // objects for location
     private Intent myLocationServiceIntent;
     private Location myLastLocation;
+    private DetectedActivity myLikelyActivity;
+
     private static boolean gpsStat = false;
     private static boolean map_active = false;
+
+    private StatusFragment myStatusFragment;
+    private MapFragment myMapFragment;
+
+    //public static final String UPDATE_INTERVAL = "updateInterval";
 
     // same as in LocationService - unique name
     private static final String BROADCAST = "gierthhensen.hsbo.org.bewegungstrackerduisburg.BROADCAST";
     private static final String DATA = "gierthhensen.hsbo.org.bewegungstrackerduisburg.DATA";
+    private static final String BROADCAST_ACTIVITY = "gierthhensen.hsbo.org.bewegungstrackerduisburg.BROADCAST_ACTIVITY";
+    private static final String DATA_ACTIVITY = "gierthhensen.hsbo.org.bewegungstrackerduisburg.DATA_ACTIVITY";
 
     /**
      * Is called on first creation of activity
@@ -51,16 +63,21 @@ public class StartActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
-        addDynamicFragment();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // location
+        // Receiver for Location
         myLocationServiceIntent = new Intent(Intent.ACTION_SYNC, null, this, LocationService.class);
         ResponseReceiver responseReceiver = new ResponseReceiver();
         IntentFilter intentFilter = new IntentFilter(BROADCAST);
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 responseReceiver, intentFilter);
+
+        // Receiver for DetectedActivity
+        ActivityResponseReceiver activitiesResponseReceiver = new ActivityResponseReceiver();
+        IntentFilter intentFilter2 = new IntentFilter(BROADCAST_ACTIVITY);
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                activitiesResponseReceiver, intentFilter2);
 
         // Action Bar
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -72,11 +89,19 @@ public class StartActivity extends AppCompatActivity
         // Nav Drawer
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-    }
 
-    private void addDynamicFragment() {
-        Fragment frg = StatusFragment.newInstance();
-        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, frg).commit();
+        if (savedInstanceState == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            myStatusFragment = new StatusFragment();
+            myMapFragment = new MapFragment();
+
+            transaction.add(R.id.fragment_container, myStatusFragment, "fragment_status");
+            transaction.add(R.id.fragment_container, myMapFragment, "fragment_map");
+
+            transaction.hide(myMapFragment);
+            transaction.commit();
+        }
     }
 
     /**
@@ -139,7 +164,7 @@ public class StartActivity extends AppCompatActivity
             startGPS();
         }
 
-        else if (id == R.id.nav_share) {
+        else if (id == R.id.nav_switch_fragment) {
             switchFragment();
             DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);
@@ -155,21 +180,87 @@ public class StartActivity extends AppCompatActivity
     private class ResponseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             Location location = (Location) intent.getExtras().get(DATA);
             myLastLocation = location;
-            updatePoint(myLastLocation);
+            updateFeature();
+        }
+    }
+
+    /**
+     * Receiver for Activities
+     */
+    private class ActivityResponseReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ArrayList<DetectedActivity> detectedActivities = intent.getParcelableArrayListExtra(DATA_ACTIVITY);
+            DetectedActivity likelyActivity = null;
+            for (DetectedActivity activity : detectedActivities) {
+                if (likelyActivity == null) {
+                    likelyActivity = activity;
+                    myLikelyActivity = likelyActivity;
+
+                } else {
+                    if (likelyActivity.getConfidence() < activity.getConfidence()) {
+                        likelyActivity = activity;
+                        myLikelyActivity = likelyActivity;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Set String to activityType
+     * @param ActivityType
+     * @return
+     */
+    public String getDetectedActivity(int ActivityType) {
+        switch (ActivityType) {
+            case DetectedActivity.IN_VEHICLE:
+                return "IN_VEHICLE";
+            case DetectedActivity.ON_BICYCLE:
+                return "ON_BYCICLE";
+            case DetectedActivity.ON_FOOT:
+                return "ON_FOOT";
+            case DetectedActivity.RUNNING:
+                return "RUNNING";
+            case DetectedActivity.WALKING:
+                return "WALKING";
+            case DetectedActivity.STILL:
+                return "STILL";
+            case DetectedActivity.TILTING:
+                return "TILTING";
+            case DetectedActivity.UNKNOWN:
+                return "UNKNOWN";
+            default:
+                return "UNKNOWN";
         }
     }
 
     /**
      * Sets TextView to new coordinates
-     * @param location
+     * @param
      */
-    public void updatePoint (Location location) {
-        String lat = Double.toString(location.getLatitude());
-        String lon = Double.toString(location.getLongitude());
-        TextView coordinates = (TextView) findViewById(R.id.coordinates);
-        coordinates.setText(lon + " , " + lat);
+    public void updateFeature () {
+
+        Location location = myLastLocation;
+        DetectedActivity activity = myLikelyActivity;
+
+        String act = "UNKNOW";
+        String lat = String.valueOf(location.getLatitude());
+        String lon = String.valueOf(location.getLongitude());
+
+        if (activity != null){
+            act = getDetectedActivity(activity.getType());
+            String test = lat + " / " + lon + " / " + act;
+            Toast.makeText(this, test , Toast.LENGTH_SHORT).show();
+        }
+
+        else {
+            String test = lat + " / " + lon;
+            Toast.makeText(this, test, Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -177,15 +268,11 @@ public class StartActivity extends AppCompatActivity
      * Triggers LocationService
      */
     public void startGPS() {
+
         if (gpsStat == false) {
             myLocationServiceIntent.putExtra("type", "startTracking");
+            myLocationServiceIntent.putExtra("trackingRate", getUpdateIntervalFromPreferences());
             startService(myLocationServiceIntent);
-
-            TextView statusText = (TextView) findViewById(R.id.statusText);
-            statusText.setText("GPS Tracking running");
-            statusText.setTextColor(Color.GREEN);
-            TextView cText = (TextView) findViewById(R.id.coordinates);
-            cText.setTextColor(Color.YELLOW);
 
             /**
              *
@@ -207,12 +294,6 @@ public class StartActivity extends AppCompatActivity
         } else if (gpsStat == true) {
             myLocationServiceIntent.putExtra("type", "endTracking");
             startService(myLocationServiceIntent);
-
-            TextView statusText = (TextView) findViewById(R.id.statusText);
-            statusText.setText("Service Not Running");
-            statusText.setTextColor(Color.RED);
-            TextView cText = (TextView) findViewById(R.id.coordinates);
-            cText.setTextColor(Color.RED);
 
             gpsStat = false;
             cancelNotification(this, 001);
@@ -257,6 +338,17 @@ public class StartActivity extends AppCompatActivity
         String ns = Context.NOTIFICATION_SERVICE;
         NotificationManager nMgr = (NotificationManager) ctx.getSystemService(ns);
         nMgr.cancel(notifyId);
+    }
+
+    /**
+     * TODO: Get interval from settings field
+     * @return
+     */
+    public int getUpdateIntervalFromPreferences() {
+        //SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
+        //int trackingInterval = sPref.getInt(UPDATE_INTERVAL, 10000);
+        int trackingInterval = 5 *1000;
+        return trackingInterval;
     }
 
     /**
