@@ -5,19 +5,26 @@ import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -46,6 +53,8 @@ public class StartActivity extends AppCompatActivity
 
     private StatusFragment myStatusFragment;
     private MapFragment myMapFragment;
+
+    public static final String UPDATE_INTERVAL = "updateInterval";
 
     //public static final String UPDATE_INTERVAL = "updateInterval";
 
@@ -162,6 +171,8 @@ public class StartActivity extends AppCompatActivity
 
         if (id == R.id.gps) {
             startGPS();
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
         }
 
         else if (id == R.id.nav_switch_fragment) {
@@ -247,7 +258,7 @@ public class StartActivity extends AppCompatActivity
         Location location = myLastLocation;
         DetectedActivity activity = myLikelyActivity;
 
-        String act = "UNKNOW";
+        String act;
         String lat = String.valueOf(location.getLatitude());
         String lon = String.valueOf(location.getLongitude());
 
@@ -270,26 +281,64 @@ public class StartActivity extends AppCompatActivity
     public void startGPS() {
 
         if (gpsStat == false) {
-            myLocationServiceIntent.putExtra("type", "startTracking");
-            myLocationServiceIntent.putExtra("trackingRate", getUpdateIntervalFromPreferences());
-            startService(myLocationServiceIntent);
 
             /**
-             *
+             * Permission Check for Android 6+
              */
-            NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.drawable.ic_media_play)
-                            .setOngoing(true)
-                            .setContentTitle("Bewegungstracker Duisburg")
-                            .setContentText("GPS gestartet");
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
 
-            int mNotificationId = 001;
-            NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            mNotifyMgr.notify(mNotificationId, mBuilder.build());
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+            }
 
-            gpsStat = true;
-            Toast.makeText(this, "Started GPS Tracking", Toast.LENGTH_SHORT).show();
+            final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+
+            if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+
+                new AlertDialog.Builder(this)
+                        .setTitle("GPS disabled")
+                        .setMessage("GPS is disabled")
+                        .setPositiveButton("Enable GPS", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                            }
+                        })
+                        .setNegativeButton("Ignore", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
+
+            else {
+                myLocationServiceIntent.putExtra("type", "startTracking");
+                myLocationServiceIntent.putExtra("trackingRate", getUpdateIntervalFromPreferences());
+
+                startService(myLocationServiceIntent);
+
+                /**
+                 *
+                 */
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(this)
+                                .setSmallIcon(R.drawable.ic_media_play)
+                                .setOngoing(true)
+                                .setContentTitle("Bewegungstracker Duisburg")
+                                .setContentText("GPS gestartet");
+
+                int mNotificationId = 001;
+                NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                mNotifyMgr.notify(mNotificationId, mBuilder.build());
+
+                gpsStat = true;
+                Toast.makeText(this, "Started GPS Tracking: " + getUpdateIntervalFromPreferences(), Toast.LENGTH_SHORT).show();
+            }
 
         } else if (gpsStat == true) {
             myLocationServiceIntent.putExtra("type", "endTracking");
@@ -345,10 +394,26 @@ public class StartActivity extends AppCompatActivity
      * @return
      */
     public int getUpdateIntervalFromPreferences() {
-        //SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
-        //int trackingInterval = sPref.getInt(UPDATE_INTERVAL, 10000);
-        int trackingInterval = 5 *1000;
+        SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
+        int trackingInterval = sPref.getInt(UPDATE_INTERVAL, 5);
         return trackingInterval;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        //SharedPreferences sPref = getPreferences(Context.MODE_PRIVATE);
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.commit();
     }
 
     /**

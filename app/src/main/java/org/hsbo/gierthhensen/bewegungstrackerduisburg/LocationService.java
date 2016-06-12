@@ -34,6 +34,7 @@ public class LocationService extends IntentService {
     // same as in StartActivity
     private static final String BROADCAST = "gierthhensen.hsbo.org.bewegungstrackerduisburg.BROADCAST";
     private static final String DATA = "gierthhensen.hsbo.org.bewegungstrackerduisburg.DATA";
+    private Integer trackingRate;
 
     public LocationService() {
         super("Location Service");
@@ -46,7 +47,7 @@ public class LocationService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String type = intent.getStringExtra("type");
-        int trackingRate = intent.getIntExtra("trackingRate", 10000);
+        trackingRate = intent.getIntExtra("trackingRate", 5);
 
         if (myLocationListener == null) {
             myLocationListener = new MyLocationListener(this);
@@ -86,7 +87,7 @@ public class LocationService extends IntentService {
         private LocationRequest myLocationRequest;
         private LocationService myLocationService;
 
-        private long UPDATE_in_MS = 5 * 1000;
+        private long UPDATE_in_MS = trackingRate;
 
 
         public MyLocationListener(LocationService locationService) {
@@ -125,13 +126,13 @@ public class LocationService extends IntentService {
 
             myLocationRequest = LocationRequest.create()
                     .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                    .setInterval(UPDATE_in_MS)
-                    .setFastestInterval(UPDATE_in_MS);
+                    .setInterval(UPDATE_in_MS*1000)
+                    .setFastestInterval(UPDATE_in_MS*1000);
 
             LocationServices.FusedLocationApi
                     .requestLocationUpdates(myGoogleApiClient, myLocationRequest, this);
             ActivityRecognition.ActivityRecognitionApi
-                    .requestActivityUpdates(myGoogleApiClient, UPDATE_in_MS, getActivityDetectionPendingIntent()).setResultCallback(this);
+                    .requestActivityUpdates(myGoogleApiClient, UPDATE_in_MS*1000, getActivityIntent()).setResultCallback(this);
         }
 
         @Override
@@ -148,7 +149,7 @@ public class LocationService extends IntentService {
             UPDATE_in_MS = trackingRate;
         }
 
-        private PendingIntent getActivityDetectionPendingIntent() {
+        private PendingIntent getActivityIntent() {
             Intent intent = new Intent(getBaseContext(), ActivityIntents.class);
             return PendingIntent.getService(getBaseContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
@@ -176,7 +177,7 @@ public class LocationService extends IntentService {
         public void stopLocationUpdates() {
             if (myGoogleApiClient.isConnected()) {
                 LocationServices.FusedLocationApi.removeLocationUpdates(myGoogleApiClient, this);
-                ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(myGoogleApiClient, getActivityDetectionPendingIntent());
+                ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(myGoogleApiClient, getActivityIntent());
             }
             myGoogleApiClient.disconnect();
         }
