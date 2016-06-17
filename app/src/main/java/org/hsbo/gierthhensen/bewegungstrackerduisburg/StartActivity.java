@@ -279,11 +279,11 @@ public class StartActivity extends AppCompatActivity
     }
 
     //get Latitude and Longitude for Js
-    public class WebAppInterface {
+    public class WebInterface {
         Context mContext;
 
         /** Instantiate the interface and set the context */
-        WebAppInterface(Context c) {
+        WebInterface(Context c) {
             mContext = c;
         }
 

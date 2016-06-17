@@ -52,7 +52,7 @@ public class MapFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_map, container, false);
         webView = (WebView) view.findViewById(R.id.webview);
         webView.setWebViewClient(new WebViewClient());
-        webView.addJavascriptInterface(new StartActivity.WebAppInterface(), "Android");
+        webView.addJavascriptInterface(new StartActivity.WebInterface(), "Android");
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
