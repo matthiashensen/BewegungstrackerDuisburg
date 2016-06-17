@@ -29,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import com.google.android.gms.location.DetectedActivity;
@@ -56,7 +57,8 @@ public class StartActivity extends AppCompatActivity
 
     public static final String UPDATE_INTERVAL = "updateInterval";
 
-    //public static final String UPDATE_INTERVAL = "updateInterval";
+    private String latitude;
+    private String longitude;
 
     // same as in LocationService - unique name
     private static final String BROADCAST = "gierthhensen.hsbo.org.bewegungstrackerduisburg.BROADCAST";
@@ -261,6 +263,8 @@ public class StartActivity extends AppCompatActivity
         String act;
         String lat = String.valueOf(location.getLatitude());
         String lon = String.valueOf(location.getLongitude());
+        latitude = lat;
+        longitude = lon;
 
         if (activity != null){
             act = getDetectedActivity(activity.getType());
@@ -271,6 +275,28 @@ public class StartActivity extends AppCompatActivity
         else {
             String test = lat + " / " + lon;
             Toast.makeText(this, test, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //get Latitude and Longitude for Js
+    public class WebAppInterface {
+        Context mContext;
+
+        /** Instantiate the interface and set the context */
+        WebAppInterface(Context c) {
+            mContext = c;
+        }
+
+        /** Get the value of latitude */
+        @JavascriptInterface
+        public String getLatitude() {
+            return latitude;
+        }
+
+        /** Get the value of longitude */
+        @JavascriptInterface
+        public String getLongitude() {
+            return longitude;
         }
     }
 
