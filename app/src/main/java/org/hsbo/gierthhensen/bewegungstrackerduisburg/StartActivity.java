@@ -57,8 +57,8 @@ public class StartActivity extends AppCompatActivity
 
     public static final String UPDATE_INTERVAL = "updateInterval";
 
-    private String latitude;
-    private String longitude;
+    private static String latitude;
+    private static String longitude;
 
     // same as in LocationService - unique name
     private static final String BROADCAST = "gierthhensen.hsbo.org.bewegungstrackerduisburg.BROADCAST";
@@ -279,11 +279,12 @@ public class StartActivity extends AppCompatActivity
     }
 
     //get Latitude and Longitude for Js
-    public class WebInterface {
+    public static class WebInterface {
+        private final Context c = null;
         Context mContext;
 
         /** Instantiate the interface and set the context */
-        WebInterface(Context c) {
+        WebInterface() {
             mContext = c;
         }
 
