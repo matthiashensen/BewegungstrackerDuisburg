@@ -213,11 +213,6 @@ public class StartActivity extends AppCompatActivity
                     likelyActivity = activity;
                     myLikelyActivity = likelyActivity;
 
-                } else {
-                    if (likelyActivity.getConfidence() < activity.getConfidence()) {
-                        likelyActivity = activity;
-                        myLikelyActivity = likelyActivity;
-                    }
                 }
             }
         }
@@ -270,6 +265,7 @@ public class StartActivity extends AppCompatActivity
             act = getDetectedActivity(activity.getType());
             String test = lat + " / " + lon + " / " + act;
             Toast.makeText(this, test , Toast.LENGTH_SHORT).show();
+            //TODO call JS method, push coordinates
         }
 
         else {
