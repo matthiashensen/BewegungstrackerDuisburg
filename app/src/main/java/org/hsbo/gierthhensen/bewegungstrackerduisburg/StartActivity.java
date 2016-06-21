@@ -30,6 +30,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.google.android.gms.location.DetectedActivity;
@@ -50,7 +53,7 @@ public class StartActivity extends AppCompatActivity
     private DetectedActivity myLikelyActivity;
 
     private static boolean gpsStat = false;
-    private static boolean map_active = false;
+    private static boolean map_active = true;
 
     private StatusFragment myStatusFragment;
     private MapFragment myMapFragment;
@@ -110,7 +113,7 @@ public class StartActivity extends AppCompatActivity
             transaction.add(R.id.fragment_container, myStatusFragment, "fragment_status");
             transaction.add(R.id.fragment_container, myMapFragment, "fragment_map");
 
-            transaction.hide(myMapFragment);
+            transaction.hide(myStatusFragment);
             transaction.commit();
         }
     }
@@ -182,8 +185,6 @@ public class StartActivity extends AppCompatActivity
             DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);
         }
-        else if (id == R.id.nav_send) {}
-
         return true;
     }
 
@@ -261,14 +262,25 @@ public class StartActivity extends AppCompatActivity
         latitude = lat;
         longitude = lon;
 
+        WebView webView = (WebView) findViewById(R.id.webview);
+        webView.setWebViewClient(new WebViewClient());
+
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setSupportZoom(true);
+
+
         if (activity != null){
             act = getDetectedActivity(activity.getType());
+            webView.loadUrl("javascript:updateFeature("+lat+","+lon+");");
             String test = lat + " / " + lon + " / " + act;
             Toast.makeText(this, test , Toast.LENGTH_SHORT).show();
             //TODO call JS method, push coordinates
         }
 
         else {
+            act = "AbCD";
+            webView.loadUrl("javascript:updateFeature("+lat+","+lon+");");
             String test = lat + " / " + lon;
             Toast.makeText(this, test, Toast.LENGTH_SHORT).show();
         }
@@ -379,8 +391,10 @@ public class StartActivity extends AppCompatActivity
      * Switches between status and map
      */
     public void switchFragment(){
+        MenuItem item = (MenuItem) findViewById(R.id.nav_switch_fragment);
 
         if (map_active == false){
+           // item.setTitle("Settings");
             MapFragment frgMap = new MapFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, frgMap);
@@ -391,6 +405,7 @@ public class StartActivity extends AppCompatActivity
         }
 
         else {
+            //item.setTitle("Map");
             StatusFragment frgStatus = new StatusFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, frgStatus);

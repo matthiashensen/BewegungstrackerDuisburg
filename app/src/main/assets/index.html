@@ -26,24 +26,31 @@
 
   L.esri.basemapLayer('Streets').addTo(map);
   var service = L.esri.featureLayer({
-    url: 'http://services6.arcgis.com/4xcXhPaJrA6efO9w/ArcGIS/rest/services/TrackedPoints/FeatureServer/0'
+    url: 'http://services6.arcgis.com/4xcXhPaJrA6efO9w/arcgis/rest/services/Bewegungstracker/FeatureServer/0'
   }).addTo(map);
+
   service.query().bounds(function (error, latlngbounds) {
     map.fitBounds(latlngbounds);
   });
+
 
   var lon
   var lat
   var latlng = L.latLng(lat, lon);
 
-  var latitude = Android.getLatitude();
-var longitude = Android.getLongitude();
+//var latitude = Android.getLatitude();
+//var longitude = Android.getLongitude();
 
-var userID="mh"
-var jetzt = new Date();
-var time = alert(jetzt.getTime());
-var heute = new Date();
-var datum = heute.getDate();
+function updateFeature(latitude,longitude){
+
+var service = L.esri.featureLayer({
+    url: 'http://services6.arcgis.com/4xcXhPaJrA6efO9w/arcgis/rest/services/Bewegungstracker/FeatureServer/0'
+  })
+
+var userID = "mh"
+var date = new Date();
+var time = date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+" Uhr"
+var ddmmyyyy = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate()
 
 // Save new Features
 var addFeature = {
@@ -53,10 +60,12 @@ var addFeature = {
         coordinates: [longitude, latitude]
     },
     properties: {
-        id: '',
-        UserID: '',
-        Date: '',
-        Zeit: ''
+        UserID: userID,
+        Date: ddmmyyyy,
+        Time: time,
+        Vehicle: '',
+        SessionID: ''
+
     }
 };
 
@@ -67,16 +76,16 @@ service.addFeature(addFeature, function(error, response){
       console.log('Successfully created feature with id ' + response.objectId);
     }
 });
+  service.query().bounds(function (error, latlngbounds) {
+    map.fitBounds(latlngbounds);
+  });
+}
 
 service.bindPopup(function (popup) {
-    return L.Util.template('<p>Koordinate: {}<br>Punktnummer: {OBJECTID}<br>Uhrzeit: {Zeit} Uhr<br>User: {UserID}</p>', popup.feature.properties);
+    return L.Util.template('<p>Punktnummer: {OBJECTID}<br>Uhrzeit: {Time}<br> Datum: {Date}<br> User: {UserID}</p>', popup.feature.properties);
   });
 
-/*function addTrackedPoint(lat, lon, uid, date){
 
-    var feature = { "type": "Point", "coordinates": [lat, lon] };
-    trackpoints.addFeature(feature);
-} */
 </script>
 </body>
 

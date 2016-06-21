@@ -21,8 +21,6 @@ import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.location.ActivityRecognition;
 
-//TODO: Android 6.0 Compatibility
-
 /**
  * LocationService / registered in Manifest
  */

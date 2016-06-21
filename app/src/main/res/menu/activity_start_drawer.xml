@@ -4,7 +4,7 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/gps"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_menu_send"
             android:title="Trigger Tracking" />
     </group>
 
@@ -12,12 +12,8 @@
         <menu>
             <item
                 android:id="@+id/nav_switch_fragment"
-                android:icon="@drawable/ic_menu_share"
-                android:title="View Map" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:icon="@drawable/ic_menu_manage"
+                android:title="Settings" />
         </menu>
     </item>
 
