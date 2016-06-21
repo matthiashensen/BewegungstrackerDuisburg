@@ -17,6 +17,9 @@
         <item>5 Seconds</item>
         <item>10 Seconds</item>
         <item>15 Seconds</item>
+        <item>30 Seconds</item>
+        <item>45 Seconds</item>
+        <item>60 Seconds</item>
     </string-array>
 
 </resources>

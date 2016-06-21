@@ -1,46 +1,82 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <meta charset=utf-8 />
+    <title>TEST</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <!-- Load Leaflet from CDN-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/leaflet/1.0.0-rc.1/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/leaflet/1.0.0-rc.1/leaflet-src.js"></script>
+
+    <!-- Load Esri Leaflet from CDN -->
     <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>
+
     <style>
-        body {
-        padding: 0;
-        margin: 0;
-        }
-        html, body, #map {
-        height: 100%;
-        }
+        body { margin:0; padding:0; }
+        #map { position: absolute; top:0; bottom:0; right:0; left:0; }
     </style>
 </head>
-
-
 <body>
+
 <div id="map"></div>
 
 <script>
-// set osm recognition
-var osmAttr = '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>';
+  var map = L.map('map').setView([51.4825,7.216944], 17);
 
-// init map element
-var map = L.map('map').setView([45.512, -122.680], 14);
+  L.esri.basemapLayer('Streets').addTo(map);
+  var service = L.esri.featureLayer({
+    url: 'http://services6.arcgis.com/4xcXhPaJrA6efO9w/ArcGIS/rest/services/TrackedPoints/FeatureServer/0'
+  }).addTo(map);
+  service.query().bounds(function (error, latlngbounds) {
+    map.fitBounds(latlngbounds);
+  });
 
-// Add base layer
-var baseLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution: osmAttr
-}).addTo(map);
+  var lon
+  var lat
+  var latlng = L.latLng(lat, lon);
 
-var trackpoints = L.esri.featureLayer({url: 'https://services.arcgis.com/rOo16HdIMeOBI4Mb/arcgis/rest/services/PDX_Pedestrian_Districts/FeatureServer/0',
-								style: function (){
-									return {color: "#70ca49"}}}).addTo(map);
+  var latitude = Android.getLatitude();
+var longitude = Android.getLongitude();
 
-function addTrackedPoint(lat, lon, uid, date){
+var userID="mh"
+var jetzt = new Date();
+var time = alert(jetzt.getTime());
+var heute = new Date();
+var datum = heute.getDate();
+
+// Save new Features
+var addFeature = {
+    type: 'Feature',
+    geometry: {
+        type: 'Point',
+        coordinates: [longitude, latitude]
+    },
+    properties: {
+        id: '',
+        UserID: '',
+        Date: '',
+        Zeit: ''
+    }
+};
+
+service.addFeature(addFeature, function(error, response){
+    if(error){
+      console.log('error creating feature ' + error.message);
+    } else {
+      console.log('Successfully created feature with id ' + response.objectId);
+    }
+});
+
+service.bindPopup(function (popup) {
+    return L.Util.template('<p>Koordinate: {}<br>Punktnummer: {OBJECTID}<br>Uhrzeit: {Zeit} Uhr<br>User: {UserID}</p>', popup.feature.properties);
+  });
+
+/*function addTrackedPoint(lat, lon, uid, date){
 
     var feature = { "type": "Point", "coordinates": [lat, lon] };
     trackpoints.addFeature(feature);
-}
+} */
 </script>
 </body>
 

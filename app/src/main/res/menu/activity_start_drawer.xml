@@ -13,7 +13,7 @@
             <item
                 android:id="@+id/nav_switch_fragment"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Change Content View" />
+                android:title="View Map" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"

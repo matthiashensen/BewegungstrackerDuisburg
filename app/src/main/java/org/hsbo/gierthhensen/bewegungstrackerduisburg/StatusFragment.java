@@ -101,6 +101,15 @@ public class StatusFragment extends Fragment implements AdapterView.OnItemSelect
         else if (a == 2){
             interval = 15;
         }
+        else if (a == 3){
+            interval = 30;
+        }
+        else if (a == 4){
+            interval = 45;
+        }
+        else if (a == 5){
+            interval = 60;
+        }
         else{
             interval = 5;
         }
